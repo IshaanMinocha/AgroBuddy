@@ -70,6 +70,10 @@ with open('/Users/aditya/Desktop/CODEATHON/python/yield/yield_Prediction.pkl', '
 
 print("\nModel and encoders saved to 'yield_Prediction.pkl'")
 
+# Update valid crops list after standardization
+valid_crops = ["Rice", "Maize", "Cotton(lint)", "Banana", "Moong(Green Gram)", 
+               "Urad", "Arhar/Tur", "Grapes", "Mango", "Orange", "Papaya", "Masoor"]
+
 def predict_production(season, crop, temperature, humidity, soil_moisture, area):
     """
     Make production predictions for given parameters

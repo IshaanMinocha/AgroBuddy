@@ -41,7 +41,9 @@ while True:
         break
     print("Error: Invalid season")
 
-valid_crops = ["Rice", "Maize", "Cotton(lint)", "Banana", "Moong(Green Gram)", "Urad", "Arhar/Tur"]
+valid_crops = ["Rice", "Maize", "Cotton(lint)", "Banana", "Moong(Green Gram)", 
+               "Urad", "Arhar/Tur", "Grapes", "Mango", "Orange", "Papaya", "Masoor"]
+
 while True:
     print("\nAvailable crops:", ", ".join(valid_crops))
     crop = input("Enter crop: ").strip()
