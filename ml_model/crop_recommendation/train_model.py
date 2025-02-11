@@ -16,6 +16,7 @@ try:
     if 'crop' in df.columns:
         df = df.rename(columns={'crop': 'label'})
     
+    # Print column names to verify
     print(f"Successfully loaded {len(df)} rows of data")
     print("Columns in dataset:", df.columns.tolist())
     
@@ -26,9 +27,9 @@ except Exception as e:
 # Clean the data
 df = df[df.notna().all(axis=1)]
 
-# Separate features and target
-X = df.drop('label', axis=1)
-y = df['label']
+# Separate features and target (using 'Crop' instead of 'label')
+X = df.drop('Crop', axis=1)
+y = df['Crop']
 
 # Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
