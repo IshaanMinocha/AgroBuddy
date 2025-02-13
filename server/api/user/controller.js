@@ -1,4 +1,4 @@
-import User from './UserModel.js';
+import User from './model.js';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 

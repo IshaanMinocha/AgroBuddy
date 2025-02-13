@@ -2,7 +2,8 @@ import express from 'express';
 import envConfig from './config/dotenv.js';
 import connectDb from './config/db.js';
 import cors from 'cors';
-import userRouter from './api/user/UserRoute.js';
+import userRouter from './api/user/route.js';
+import voicebotRouter from './api/voicebot/route.js';
 
 envConfig();
 
@@ -16,6 +17,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api/user', userRouter);
+app.use('/api/voicebot', voicebotRouter);
 
 const startServer = async () => {
     try {

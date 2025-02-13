@@ -1,8 +1,24 @@
-import React from 'react';
 import { View, Alert, StyleSheet, Text, Modal, Pressable } from 'react-native';
-import { Button, MD3Colors } from 'react-native-paper';
+import { Button, MD3Colors, ActivityIndicator } from 'react-native-paper';
+import { useState } from 'react';
+import { Audio } from 'expo-av';
+import useAudioRecorder from '../hooks/useAudioRecorder';
 
 const Voicebot = ({ onClose }) => {
+
+  const [sound, setSound] = useState(null);
+  const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
+
+  const playSound = async () => {
+    if (!audioUri) return;
+    console.log('Loading sound from URI:', audioUri);
+    const { sound: returnSound } = await Audio.Sound.createAsync({ uri: audioUri });
+    setSound(returnSound);
+    console.log('Playing sound...');
+    await sound.playAsync();
+  };
+
+
   return (
     <Modal
       animationType="slide"
@@ -20,6 +36,16 @@ const Voicebot = ({ onClose }) => {
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={() => { Alert.alert('Start Talking Pressed'); }}>
             Start Talking
           </Button>
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button>
+          {audioUri && (
+            <View>
+              <Text style={{ marginTop: 20 }}>
+                Recorded Audio URI: {audioUri}
+              </Text>
+              <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={playSound} >Play Sound</Button>
+            </View>
+          )}
         </View>
       </View>
     </Modal>

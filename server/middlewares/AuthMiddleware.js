@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../api/user/UserModel.js';
+import User from '../api/user/model.js';
 import asyncHandler from 'express-async-handler';
 
 const jwtSecret = process.env.JWT_SECRET;
