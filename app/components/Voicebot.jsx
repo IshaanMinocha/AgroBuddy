@@ -3,19 +3,69 @@ import { Button, MD3Colors, ActivityIndicator } from 'react-native-paper';
 import { useState } from 'react';
 import { Audio } from 'expo-av';
 import useAudioRecorder from '../hooks/useAudioRecorder';
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
+import { BACKEND_URL } from '@env';
 
 const Voicebot = ({ onClose }) => {
 
   const [sound, setSound] = useState(null);
   const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
+  const [transcription, setTranscription] = useState('');
 
   const playSound = async () => {
     if (!audioUri) return;
     console.log('Loading sound from URI:', audioUri);
+
     const { sound: returnSound } = await Audio.Sound.createAsync({ uri: audioUri });
     setSound(returnSound);
+
     console.log('Playing sound...');
-    await sound.playAsync();
+    await returnSound.playAsync();
+  };
+
+  const uploadRecording = async (audioUri) => {
+    console.log('Uploading recording');
+    const fileInfo = await FileSystem.getInfoAsync(audioUri);
+    if (!fileInfo.exists) {
+      console.error('File does not exist');
+      return;
+    }
+    console.log(fileInfo, 'fileInfo');
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: audioUri,
+      name: 'recording.m4a',
+      type: 'audio/mp4',
+    });
+    console.log(formData, 'formData');
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/voicebot/out`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Transcription:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error uploading recording', error);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!audioUri) {
+      console.warn('No audio file available to transcribe');
+      return;
+    }
+    try {
+      const transcribedText = await uploadRecording(audioUri);
+      console.log(transcribedText, "transcribedText");
+      setTranscription(transcribedText);
+    } catch (error) {
+      console.error('Error during transcription:', error);
+    }
   };
 
 
@@ -38,12 +88,20 @@ const Voicebot = ({ onClose }) => {
           </Button>
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button>
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button>
           {audioUri && (
             <View>
               <Text style={{ marginTop: 20 }}>
                 Recorded Audio URI: {audioUri}
               </Text>
               <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={playSound} >Play Sound</Button>
+            </View>
+          )}
+          {transcription && (
+            <View>
+              <Text style={{ marginTop: 20 }}>
+                Transcription: {transcription}
+              </Text>
             </View>
           )}
         </View>
