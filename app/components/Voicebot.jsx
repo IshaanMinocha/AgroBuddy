@@ -19,7 +19,7 @@ const Voicebot = ({ onClose }) => {
   const [sound, setSound] = useState(null);
   const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
   const [transcription, setTranscription] = useState('');
-  const [currentTranscription, setCurrentTranscription] = useState('');
+  // const [currentTranscription, setCurrentTranscription] = useState('');
   const [transcriptions, setTranscriptions] = useState([]);
   const [languageCode, setLanguageCode] = useState('hi-IN');
   const [selectedLanguage, setSelectedLanguage] = useState('Hindi');
