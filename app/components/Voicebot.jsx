@@ -20,7 +20,6 @@ const Voicebot = ({ onClose }) => {
   const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
   const [transcription, setTranscription] = useState('');
   const [currentTranscription, setCurrentTranscription] = useState('');
-  const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
   const [transcriptions, setTranscriptions] = useState([]);
   const [languageCode, setLanguageCode] = useState('hi-IN');
   const [selectedLanguage, setSelectedLanguage] = useState('Hindi');
@@ -45,16 +44,10 @@ const Voicebot = ({ onClose }) => {
     Sanskrit: { modelLang: "sanskrit", tts: "sa-IN" },
   };
 
-  const dummyMessages = [
-    { id: 1, type: 'user', message: 'Hello! Can you help me with something?' },
-    { id: 2, type: 'bot', message: 'Of course! Im here to help. What do you need assistance with?' },
-    { id: 3, type: 'user', message: 'I need information about machine learning.' },
-    { id: 4, type: 'bot', message: 'Machine learning is a field of artificial intelligence that uses statistical techniques to give computer systems the ability to "learn" from data, without being explicitly programmed.' },
-    { id: 5, type: 'user', message: 'Can you give me a simple example?' },
-    { id: 6, type: 'bot', message: 'Think of email spam detection. The system learns from patterns in previous spam emails to identify new ones. It gets better over time as it sees more examples!' },
-  ];
-
   const handleConversation = async () => {
+    console.log("first")
+    const text = await handleTranscribe();
+    console.log(text, "text")
 
   }
 
@@ -185,11 +178,28 @@ const Voicebot = ({ onClose }) => {
       const transcribedText = await uploadRecording(audioUri);
       console.log(transcribedText, "transcribedText");
       setTranscription(transcribedText);
+      return transcribedText;
     } catch (error) {
       console.error('Error during transcription:', error);
     }
   };
 
+  const handleStartRecording = async () => {
+    try {
+      await startRecording();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to start recording');
+    }
+  };
+
+  const handleStopRecording = async () => {
+    try {
+      await stopRecording();
+      await handleConversation();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to stop recording');
+    }
+  };
 
   return (
     <Modal
@@ -220,44 +230,61 @@ const Voicebot = ({ onClose }) => {
         ref={scrollViewRef}
         onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
       >
-        <View>
-          <View>
-            {dummyMessages.map((msg) => (
-              <Message
-                key={msg.id}
-                message={msg.message}
-                type={msg.type}
-              />
-            ))}
-          </View>
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button>
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button>
-          {audioUri && (
-            <View>
-              <Text style={{ marginTop: 20 }}>
-                Recorded Audio URI: {audioUri}
-              </Text>
-              <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={playSound} >Play Sound</Button>
+        <View style={{ marginBottom: 50, marginTop: 20 }}>
+          {transcriptions.map((transcription) => (
+            <View key={transcription._id}>
+              {transcription.userQuery && (
+                <Message
+                  message={transcription.userQuery}
+                  type="userQuery"
+                />
+              )}
+              {transcription.botResponse && (
+                <Message
+                  message={transcription.botResponse}
+                  type="botResponse"
+                />
+              )}
             </View>
-          )}
-          {transcription && (
-            <View>
-              <Text style={{ marginTop: 20 }}>
-                Transcription: {transcription}
-              </Text>
-            </View>
-          )}
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button>
-          {answer !== '' && (
-            <View>
-              <Text style={{ marginTop: 20, fontSize: 16 }}>Answer:</Text>
-              <Text style={{ marginTop: 10 }}>{answer}</Text>
-            </View>
-          )}
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button>
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button>
+          ))}
         </View>
+        {/* <View >
+            <Text >
+              {transcriptions.map((transcription) => (
+                <View key={transcription._id}>
+                  <Text>User Query: {transcription.userQuery}</Text>
+                  <Text>Bot Response: {transcription.botResponse}</Text>
+                </View>
+              ))}
+            </Text>
+          </View> */}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button>
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button>
+        {audioUri && (
+          <View>
+            <Text style={{ marginTop: 20 }}>
+              Recorded Audio URI: {audioUri}
+            </Text>
+            <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={playSound} >Play Sound</Button>
+          </View>
+        )}
+        {transcription && (
+          <View>
+            <Text style={{ marginTop: 20 }}>
+              Transcription: {transcription}
+            </Text>
+          </View>
+        )}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button>
+        {answer !== '' && (
+          <View>
+            <Text style={{ marginTop: 20, fontSize: 16 }}>Answer:</Text>
+            <Text style={{ marginTop: 10 }}>{answer}</Text>
+          </View>
+        )}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button>
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button>
       </ScrollView>
       <View>
         <VoiceAnimation
@@ -282,11 +309,15 @@ const Voicebot = ({ onClose }) => {
             ))}
           </Picker>
         </View>
-        <View style={styles.recordingStatus}>
+        <Pressable
+          onPressIn={handleStartRecording}
+          onPressOut={handleStopRecording}
+          // disabled={isProcessing || isBotSpeaking}
+          style={styles.recordingStatus}>
           <Text style={styles.recordingText}>
             {isRecording ? 'Recording...' : 'Hold to Record'}
           </Text>
-        </View>
+        </Pressable>
       </View>
     </Modal>
   );

@@ -3,24 +3,24 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MD3Colors } from "react-native-paper";
 
 export const Message = ({ message, type }) => (
-    <View style={[styles.messageRow, type === 'user' ? styles.userRow : styles.botRow]}>
-        {type === 'bot' && (
+    <View style={[styles.messageRow, type === 'userQuery' ? styles.userRow : styles.botRow]}>
+        {type === 'botResponse' && (
             <View style={styles.avatarContainer}>
                 <MaterialCommunityIcons name="robot" size={24} color="#666" />
             </View>
         )}
         <View style={[
             styles.messageBubble,
-            type === 'user' ? styles.userBubble : styles.botBubble
+            type === 'userQuery' ? styles.userBubble : styles.botBubble
         ]}>
             <Text style={[
                 styles.messageText,
-                type === 'user' ? styles.userText : styles.botText
+                type === 'userQuery' ? styles.userText : styles.botText
             ]}>
                 {message}
             </Text>
         </View>
-        {type === 'user' && (
+        {type === 'userQuery' && (
             <View style={styles.avatarContainer}>
                 <MaterialCommunityIcons name="account" size={24} color="#666" />
             </View>
