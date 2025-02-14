@@ -1,6 +1,6 @@
 import { View, Alert, StyleSheet, Text, Modal, Pressable, ScrollView } from 'react-native';
 import { Button, MD3Colors, ActivityIndicator } from 'react-native-paper';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Audio } from 'expo-av';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import axios from 'axios';
@@ -10,6 +10,7 @@ import { BACKEND_URL } from '@env';
 import { Picker } from '@react-native-picker/picker';
 import { Message } from './Message';
 import VoiceAnimation from './VoiceAnimation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Voicebot = ({ onClose }) => {
 
@@ -20,8 +21,7 @@ const Voicebot = ({ onClose }) => {
   const [transcription, setTranscription] = useState('');
   const [currentTranscription, setCurrentTranscription] = useState('');
   const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
-  const [userTranscriptions, setUserTranscriptions] = useState([]);
-  const [botTranscriptions, setBotTranscriptions] = useState([]);
+  const [transcriptions, setTranscriptions] = useState([]);
   const [languageCode, setLanguageCode] = useState('hi-IN');
   const [selectedLanguage, setSelectedLanguage] = useState('Hindi');
   const [answer, setAnswer] = useState('');
@@ -30,6 +30,7 @@ const Voicebot = ({ onClose }) => {
   const [isBotSpeaking, setIsBotSpeaking] = useState(false);
 
   const languageMapping = {
+    English: { modelLang: "english", tts: "en-IN" },
     Hindi: { modelLang: "hindi", tts: "hi-IN" },
     Tamil: { modelLang: "tamil", tts: "ta-IN" },
     Telugu: { modelLang: "telugu", tts: "te-IN" },
@@ -53,6 +54,28 @@ const Voicebot = ({ onClose }) => {
     { id: 6, type: 'bot', message: 'Think of email spam detection. The system learns from patterns in previous spam emails to identify new ones. It gets better over time as it sees more examples!' },
   ];
 
+  const handleConversation = async () => {
+
+  }
+
+  const getTranscriptions = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/voicebot/transciptions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('Transcriptions:', response.data.transcriptions);
+      setTranscriptions(response.data.transcriptions);
+    } catch (error) {
+      console.error('Error getting transcriptions:', error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    getTranscriptions();
+  }, []);
+
   const handleSpeakAnswerExpo = async () => {
     if (!answer) {
       Alert.alert('No answer available to speak');
@@ -66,9 +89,13 @@ const Voicebot = ({ onClose }) => {
       Alert.alert('No answer available to speak');
       return;
     }
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
     try {
       const response = await axios.post(`${BACKEND_URL}/api/voicebot/in`, {
         text: answer,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       const { audio } = response.data;
       if (audio) {
@@ -88,10 +115,14 @@ const Voicebot = ({ onClose }) => {
       Alert.alert('No transcription available to process');
       return;
     }
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
     try {
       const response = await axios.post(`${BACKEND_URL}/api/voicebot/process`, {
         transcription,
         model: "gpt-4o",
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Answer:', response);
       setAnswer(response.data.answer);
@@ -129,10 +160,13 @@ const Voicebot = ({ onClose }) => {
     });
     console.log(formData, 'formData');
 
+    const token = await AsyncStorage.getItem('token');
+
     try {
       const response = await axios.post(`${BACKEND_URL}/api/voicebot/out`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
       console.log('Transcription:', response.data.data);

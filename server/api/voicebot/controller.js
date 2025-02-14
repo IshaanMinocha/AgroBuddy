@@ -1,4 +1,4 @@
-// import Transcription from './model.js';
+import Transcription from './model.js';
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
@@ -11,6 +11,28 @@ const openaiKey = process.env.OPENAI_API_KEY;
 const elevenLabsKey = process.env.ELEVENLABS_API_KEY;
 const elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID;
 const elevenLabsApiUrl = process.env.ELEVENLABS_API_URL;
+
+export const getUserTranscriptions = async (req, res) => {
+    try {
+        const transcriptions = await Transcription.find({ userId: req.user._id });
+
+        res.status(200).json({ success: true, transcriptions });
+    } catch (error) {
+        console.error('Error getting transcriptions:', error.response ? error.response.data : error.message);
+        res.status(500).json({ success: false, error: 'Server error getting transcriptions' });
+    }
+};
+
+export const getAllTranscriptions = async (req, res) => {
+    try {
+        const transcriptions = await Transcription.find();
+
+        res.status(200).json({ success: true, transcriptions });
+    } catch (error) {
+        console.error('Error getting transcriptions:', error.response ? error.response.data : error.message);
+        res.status(500).json({ success: false, error: 'Server error getting transcriptions' });
+    }
+};
 
 export const sendVoice = async (req, res) => {
     console.log("sendVoice");
@@ -46,7 +68,6 @@ export const sendVoice = async (req, res) => {
         fs.unlinkSync(tempFilePath);
 
         const transcription = openaiResponse.data.text;
-        console.log(transcription, "firstTranscription");
 
         res.status(201).json({
             success: true,
@@ -93,6 +114,14 @@ export const processQuery = async (req, res) => {
         );
 
         const answer = openaiResponse.data.choices[0].message.content;
+
+        const newTranscription = new Transcription({
+            userId: req.user._id,
+            userQuery: transcription,
+            botResponse: answer
+        });
+        await newTranscription.save();
+
         res.status(200).json({ success: true, answer });
     } catch (error) {
         console.error('Processing query error:', error.response ? error.response.data : error.message);

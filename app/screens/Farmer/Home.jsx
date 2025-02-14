@@ -78,21 +78,17 @@ const WeatherCard = () => (
 );
 
 const CropMetrics = () => (
-  <FlatList
-    horizontal
-    data={cropMetrics}
-    showsHorizontalScrollIndicator={false}
-    keyExtractor={item => item.id}
-    renderItem={({ item }) => (
-      <View style={styles.metricCard}>
+  <View style={styles.metricsContainer}>
+    {cropMetrics.map(item => (
+      <View key={item.id} style={styles.metricCard}>
         <View style={styles.metricIcon}>
           <MaterialIcons name={item.icon} size={24} color="#4CAF50" />
         </View>
         <Text style={styles.metricValue}>{item.value}</Text>
         <Text style={styles.metricTitle}>{item.title}</Text>
       </View>
-    )}
-  />
+    ))}
+  </View>
 );
 
 const QuickActions = () => (
@@ -109,11 +105,9 @@ const QuickActions = () => (
 );
 
 const VideoTutorials = () => (
-  <FlatList
-    data={tutorials}
-    keyExtractor={item => item.id}
-    renderItem={({ item }) => (
-      <TouchableOpacity style={styles.tutorialCard}>
+  <View>
+    {tutorials.map(item => (
+      <TouchableOpacity key={item.id} style={styles.tutorialCard}>
         <View style={styles.tutorialThumbnail}>
           <MaterialIcons name="play-circle-filled" size={40} color="#FFF" />
         </View>
@@ -125,16 +119,14 @@ const VideoTutorials = () => (
           <Text style={styles.tutorialTitle}>{item.title}</Text>
         </View>
       </TouchableOpacity>
-    )}
-  />
+    ))}
+  </View>
 );
 
 const GovtSchemes = () => (
-  <FlatList
-    data={schemes}
-    keyExtractor={item => item.id}
-    renderItem={({ item }) => (
-      <TouchableOpacity style={styles.schemeCard}>
+  <View>
+    {schemes.map(item => (
+      <TouchableOpacity key={item.id} style={styles.schemeCard}>
         <View style={styles.schemeIcon}>
           <MaterialIcons name={item.icon} size={24} color="#4CAF50" />
         </View>
@@ -144,8 +136,8 @@ const GovtSchemes = () => (
         </View>
         <MaterialIcons name="chevron-right" size={24} color="#666" />
       </TouchableOpacity>
-    )}
-  />
+    ))}
+  </View>
 );
 
 const Home = () => {
@@ -420,6 +412,10 @@ const styles = StyleSheet.create({
   schemeDesc: {
     fontSize: 14,
     color: '#666',
+  },
+  metricsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 
