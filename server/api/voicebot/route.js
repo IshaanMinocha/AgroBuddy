@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.route('/out').post(singleUpload, sendVoice);
 router.route('/process').post(processQuery);
-router.route('/in').get(getVoice);
+router.route('/in').post(getVoice);
 
 export default router;

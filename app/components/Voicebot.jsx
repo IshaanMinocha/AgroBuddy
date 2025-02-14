@@ -17,17 +17,38 @@ const Voicebot = ({ onClose }) => {
   const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
   const [userTranscriptions, setUserTranscriptions] = useState([]);
   const [botTranscriptions, setBotTranscriptions] = useState([]);
-  const [languageCode, setLanguageCode] = useState('en-US');
+  const [languageCode, setLanguageCode] = useState('hi-IN');
   const [answer, setAnswer] = useState('');
 
-  const handleSpeakAnswer = async () => {
+  const handleSpeakAnswerExpo = async () => {
     if (!answer) {
       Alert.alert('No answer available to speak');
       return;
     }
     Speech.speak(answer, { language: languageCode });
-
   }
+
+  const handleSpeakAnswerEleven = async () => {
+    if (!answer) {
+      Alert.alert('No answer available to speak');
+      return;
+    }
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/voicebot/in`, {
+        text: answer,
+      });
+      const { audio } = response.data;
+      if (audio) {
+        const audioUri = `data:audio/mpeg;base64,${audio}`;
+        const { sound: ttsSound } = await Audio.Sound.createAsync({ uri: audioUri });
+        setSound(ttsSound);
+        await ttsSound.playAsync();
+      }
+    } catch (error) {
+      console.error('Error with TTS:', error.response?.data || error.message);
+    }
+  };
+
 
   const handleProcessQuery = async () => {
     if (!transcription) {
@@ -145,7 +166,8 @@ const Voicebot = ({ onClose }) => {
               <Text style={{ marginTop: 10 }}>{answer}</Text>
             </View>
           )}
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswer} >Speak Answer</Button>
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button>
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button>
         </View>
       </ScrollView>
     </Modal>

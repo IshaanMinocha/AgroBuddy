@@ -1,4 +1,4 @@
-import Transcription from './model.js';
+// import Transcription from './model.js';
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
@@ -8,6 +8,9 @@ import { processQueryPrompt } from '../../utils/prompt.js';
 
 const openaiUrl = process.env.OPENAI_API_URL;
 const openaiKey = process.env.OPENAI_API_KEY;
+const elevenLabsKey = process.env.ELEVENLABS_API_KEY;
+const elevenLabsVoiceId = process.env.ELEVENLABS_VOICE_ID;
+const elevenLabsApiUrl = process.env.ELEVENLABS_API_URL;
 
 export const sendVoice = async (req, res) => {
     console.log("sendVoice");
@@ -41,13 +44,6 @@ export const sendVoice = async (req, res) => {
         );
 
         fs.unlinkSync(tempFilePath);
-
-        // const dbtranscription = await Transcription.create({
-        //     userId,
-        //     botResponse,
-        //     userQuery
-        // });
-
 
         const transcription = openaiResponse.data.text;
         console.log(transcription, "firstTranscription");
@@ -107,17 +103,37 @@ export const processQuery = async (req, res) => {
 
 export const getVoice = async (req, res) => {
     try {
-        const transcriptions = await Transcription.find({ userId: req.user._id });
+        const { text } = req.body;
+        if (!text) {
+            return res.status(400).json({ error: 'No text provided' });
+        }
 
-        res.status(200).json({
-            success: true,
-            data: transcriptions
-        });
+        const voiceId = elevenLabsVoiceId;
+
+        const payload = {
+            text,
+            model_id: "eleven_multilingual_v2",
+        };
+
+        const elevenResponse = await axios.post(
+            `${elevenLabsApiUrl}/v1/text-to-speech/${voiceId}`,
+            payload,
+            {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'xi-api-key': elevenLabsKey,
+                    Accept: 'audio/mpeg',
+                },
+            }
+        );
+
+        const audioBuffer = Buffer.from(elevenResponse.data, 'binary');
+        const base64Audio = audioBuffer.toString('base64');
+
+        res.json({ audio: base64Audio });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error'
-        });
+        console.error('TTS error:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'TTS error' });
     }
 };
