@@ -18,18 +18,11 @@ const YieldMonitoringPage = () => {
     "ph": 6.5,
     "rainfall": 202.9
 }
-const refinedDataForYield = {
-  "temperature": 30,
-  "humidity": 50,
-  "soil_moisture": 55,
-  "area": 1000,
-  "season": "Kharif",
-  "crop": "Rice"
-}
+con
   const [selectedField, setSelectedField] = useState('Field 1');
-  const [envData, setEnvData] = useState();
+  const [envData, setEnvData] = useState(refinedData);
   const [recommendation, setRecommendation] = useState();
-  const [yieldPred, setYieldPred] = useState();
+
  
 
   // Mock sensor data
@@ -74,10 +67,9 @@ const refinedDataForYield = {
   const yieldPrediction = async()=>{
     try{
       const response = await axios.post(`${MODEL_URI}/predict-yield`, 
-        {...refinedDataForYield}
+        {...refinedData}
       )
-      console.log(response.data)
-      setYieldPred(response.data)
+      setRecommendation(response.data.yield_prediction)
     }catch(e){
       console.log(e)
     }
@@ -106,7 +98,6 @@ const refinedDataForYield = {
   const renderFieldSelector = () => (
     <Surface style={styles.fieldSelector}>
            <Button onPress={getCropRecommendation} > Get Recommendation </Button>
-           <Button onPress={yieldPrediction} > Get Yield </Button>
       <SegmentedButtons
         value={selectedField}
         onValueChange={setSelectedField}

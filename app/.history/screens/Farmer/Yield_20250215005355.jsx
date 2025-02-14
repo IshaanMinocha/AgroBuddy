@@ -27,9 +27,9 @@ const refinedDataForYield = {
   "crop": "Rice"
 }
   const [selectedField, setSelectedField] = useState('Field 1');
-  const [envData, setEnvData] = useState();
+  const [envData, setEnvData] = useState(refinedData);
   const [recommendation, setRecommendation] = useState();
-  const [yieldPred, setYieldPred] = useState();
+  const [yield, setYield] = useState();
  
 
   // Mock sensor data
@@ -77,7 +77,7 @@ const refinedDataForYield = {
         {...refinedDataForYield}
       )
       console.log(response.data)
-      setYieldPred(response.data)
+      setRecommendation(response.data)
     }catch(e){
       console.log(e)
     }
@@ -106,7 +106,7 @@ const refinedDataForYield = {
   const renderFieldSelector = () => (
     <Surface style={styles.fieldSelector}>
            <Button onPress={getCropRecommendation} > Get Recommendation </Button>
-           <Button onPress={yieldPrediction} > Get Yield </Button>
+           <Button onPress={getCropRecommendation} > Get Recommendation </Button>
       <SegmentedButtons
         value={selectedField}
         onValueChange={setSelectedField}

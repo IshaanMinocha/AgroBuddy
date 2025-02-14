@@ -1,35 +1,24 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Dimensions } from 'react-native';
 import { Card, Title, Paragraph, Appbar, Surface, IconButton, 
-         SegmentedButtons, Chip, ProgressBar, 
-         Button} from 'react-native-paper';
+         SegmentedButtons, Chip, ProgressBar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import {MODEL_URI} from "@env"
-import axios from "axios"
-
 const YieldMonitoringPage = () => {
-  const refinedDataForRecommendation = {
-    "nitrogen": 90,
-    "phosphorus": 42,
-    "potassium": 43,
-    "temperature": 20.8,
-    "humidity": 82,
-    "ph": 6.5,
-    "rainfall": 202.9
-}
-const refinedDataForYield = {
-  "temperature": 30,
-  "humidity": 50,
-  "soil_moisture": 55,
-  "area": 1000,
-  "season": "Kharif",
-  "crop": "Rice"
-}
+  const refinedData = {
+    temperature: 28,
+    humidity: 75,
+    rainfall: 65,
+    ph: 6.5,
+    nitrogen: 45,
+    phosphorus: 32,
+    potassium: 28,
+  }
   const [selectedField, setSelectedField] = useState('Field 1');
-  const [envData, setEnvData] = useState();
+  const [envData, setEnvData] = useState(refinedData);
   const [recommendation, setRecommendation] = useState();
-  const [yieldPred, setYieldPred] = useState();
+
  
 
   // Mock sensor data
@@ -60,29 +49,16 @@ const refinedDataForYield = {
   };
 
 
-  const getCropRecommendation = async()=>{
+  const getCropRecommendation = ()=>{
     try{
-      const response = await axios.post(`${MODEL_URI}/recommend-crop`, 
-        {...refinedDataForRecommendation}
+      const response = axios.post(`${MODEL_URI}/recommend-crop`, 
+        {...envData}
       )
-      setRecommendation(response.data.recommended_crop)
+      console.log(response.data, "Response");
     }catch(e){
       console.log(e)
     }
   } 
-
-  const yieldPrediction = async()=>{
-    try{
-      const response = await axios.post(`${MODEL_URI}/predict-yield`, 
-        {...refinedDataForYield}
-      )
-      console.log(response.data)
-      setYieldPred(response.data)
-    }catch(e){
-      console.log(e)
-    }
-  }
-
   const cropHealthStatus = () => {
     // Simple analysis based on sensor data
     const { nitrogen, phosphorus, potassium, moisture } = sensorData.soilHealth;
@@ -97,7 +73,6 @@ const refinedDataForYield = {
 
   const renderHeader = () => (
     <Appbar.Header>
- 
       <Appbar.Content title="Yield Monitoring" />
       <IconButton icon="refresh" onPress={() => {}} />
     </Appbar.Header>
@@ -105,8 +80,6 @@ const refinedDataForYield = {
 
   const renderFieldSelector = () => (
     <Surface style={styles.fieldSelector}>
-           <Button onPress={getCropRecommendation} > Get Recommendation </Button>
-           <Button onPress={yieldPrediction} > Get Yield </Button>
       <SegmentedButtons
         value={selectedField}
         onValueChange={setSelectedField}

@@ -27,7 +27,7 @@ const refinedDataForYield = {
   "crop": "Rice"
 }
   const [selectedField, setSelectedField] = useState('Field 1');
-  const [envData, setEnvData] = useState();
+  const [envData, setEnvData] = useState(refinedData);
   const [recommendation, setRecommendation] = useState();
   const [yieldPred, setYieldPred] = useState();
  
