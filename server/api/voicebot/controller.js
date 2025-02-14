@@ -4,6 +4,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { processQueryPrompt } from '../../utils/prompt.js';
 
 const openaiUrl = process.env.OPENAI_API_URL;
 const openaiKey = process.env.OPENAI_API_KEY;
@@ -50,7 +51,7 @@ export const sendVoice = async (req, res) => {
 
         const transcription = openaiResponse.data.text;
         console.log(transcription, "firstTranscription");
-        
+
         res.status(201).json({
             success: true,
             data: transcription
@@ -68,15 +69,41 @@ export const sendVoice = async (req, res) => {
 };
 
 export const processQuery = async (req, res) => {
-    const { userQuery } = req.body;
+    try {
+        const { transcription, model } = req.body;
+        if (!transcription) {
+            return res.status(400).json({ success: false, error: 'No transcription provided' });
+        }
 
-    const botResponse = `Processed: ${userQuery}`;
+        const prompt = processQueryPrompt + transcription
+        console.log('Prompt:', prompt);
 
-    res.status(200).json({
-        success: true,
-        botResponse
-    });
+        const openaiResponse = await axios.post(
+            `${openaiUrl}/v1/chat/completions`,
+            {
+                model: model || 'gpt-3.5-turbo',
+                messages: [
+                    { role: 'system', content: 'You are a knowledgeable agricultural advisor.' },
+                    { role: 'user', content: prompt },
+                ],
+                temperature: 0.7
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${openaiKey}`,
+                },
+            }
+        );
+
+        const answer = openaiResponse.data.choices[0].message.content;
+        res.status(200).json({ success: true, answer });
+    } catch (error) {
+        console.error('Processing query error:', error.response ? error.response.data : error.message);
+        res.status(500).json({ success: false, error: 'Server error processing query' });
+    }
 };
+
 
 export const getVoice = async (req, res) => {
     try {

@@ -1,10 +1,11 @@
-import { View, Alert, StyleSheet, Text, Modal, Pressable } from 'react-native';
+import { View, Alert, StyleSheet, Text, Modal, Pressable, ScrollView } from 'react-native';
 import { Button, MD3Colors, ActivityIndicator } from 'react-native-paper';
 import { useState } from 'react';
 import { Audio } from 'expo-av';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
+import * as Speech from 'expo-speech';
 import { BACKEND_URL } from '@env';
 
 const Voicebot = ({ onClose }) => {
@@ -12,6 +13,39 @@ const Voicebot = ({ onClose }) => {
   const [sound, setSound] = useState(null);
   const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
   const [transcription, setTranscription] = useState('');
+  const [currentTranscription, setCurrentTranscription] = useState('');
+  const [currentTranscriptionIndex, setCurrentTranscriptionIndex] = useState(0);
+  const [userTranscriptions, setUserTranscriptions] = useState([]);
+  const [botTranscriptions, setBotTranscriptions] = useState([]);
+  const [languageCode, setLanguageCode] = useState('en-US');
+  const [answer, setAnswer] = useState('');
+
+  const handleSpeakAnswer = async () => {
+    if (!answer) {
+      Alert.alert('No answer available to speak');
+      return;
+    }
+    Speech.speak(answer, { language: languageCode });
+
+  }
+
+  const handleProcessQuery = async () => {
+    if (!transcription) {
+      Alert.alert('No transcription available to process');
+      return;
+    }
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/voicebot/process`, {
+        transcription,
+        model: "gpt-4o",
+      });
+      console.log('Answer:', response);
+      setAnswer(response.data.answer);
+    } catch (error) {
+      console.error('Error processing query:', error.response?.data || error.message);
+      Alert.alert('Error processing query');
+    }
+  };
 
   const playSound = async () => {
     if (!audioUri) return;
@@ -75,7 +109,7 @@ const Voicebot = ({ onClose }) => {
       transparent={false}
       visible={true}
       onRequestClose={onClose}>
-      <View style={styles.fullHeightView}>
+      <ScrollView >
         <View style={styles.header}>
           <Text style={styles.headerText}>Voicebot</Text>
           <Pressable onPress={onClose}>
@@ -104,8 +138,16 @@ const Voicebot = ({ onClose }) => {
               </Text>
             </View>
           )}
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button>
+          {answer !== '' && (
+            <View>
+              <Text style={{ marginTop: 20, fontSize: 16 }}>Answer:</Text>
+              <Text style={{ marginTop: 10 }}>{answer}</Text>
+            </View>
+          )}
+          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswer} >Speak Answer</Button>
         </View>
-      </View>
+      </ScrollView>
     </Modal>
   );
 };
