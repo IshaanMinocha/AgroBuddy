@@ -1,6 +1,7 @@
 # dependencies
 node_modules/
-
+.history/
+.vscode/
 # Expo
 .expo/
 dist/
