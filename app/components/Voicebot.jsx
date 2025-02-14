@@ -1,14 +1,19 @@
 import { View, Alert, StyleSheet, Text, Modal, Pressable, ScrollView } from 'react-native';
 import { Button, MD3Colors, ActivityIndicator } from 'react-native-paper';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Audio } from 'expo-av';
 import useAudioRecorder from '../hooks/useAudioRecorder';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import * as Speech from 'expo-speech';
 import { BACKEND_URL } from '@env';
+import { Picker } from '@react-native-picker/picker';
+import { Message } from './Message';
+import VoiceAnimation from './VoiceAnimation';
 
 const Voicebot = ({ onClose }) => {
+
+  const scrollViewRef = useRef();
 
   const [sound, setSound] = useState(null);
   const { recording, startRecording, stopRecording, audioUri } = useAudioRecorder();
@@ -18,7 +23,35 @@ const Voicebot = ({ onClose }) => {
   const [userTranscriptions, setUserTranscriptions] = useState([]);
   const [botTranscriptions, setBotTranscriptions] = useState([]);
   const [languageCode, setLanguageCode] = useState('hi-IN');
+  const [selectedLanguage, setSelectedLanguage] = useState('Hindi');
   const [answer, setAnswer] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [isBotSpeaking, setIsBotSpeaking] = useState(false);
+
+  const languageMapping = {
+    Hindi: { modelLang: "hindi", tts: "hi-IN" },
+    Tamil: { modelLang: "tamil", tts: "ta-IN" },
+    Telugu: { modelLang: "telugu", tts: "te-IN" },
+    Kannada: { modelLang: "kannada", tts: "kn-IN" },
+    Malayalam: { modelLang: "malayalam", tts: "ml-IN" },
+    Punjabi: { modelLang: "punjabi", tts: "pa-IN" },
+    Gujarati: { modelLang: "gujarati", tts: "gu-IN" },
+    Bengali: { modelLang: "bengali", tts: "bn-IN" },
+    Marathi: { modelLang: "marathi", tts: "mr-IN" },
+    Odia: { modelLang: "odia", tts: "or-IN" },
+    Assamese: { modelLang: "assamese", tts: "as-IN" },
+    Sanskrit: { modelLang: "sanskrit", tts: "sa-IN" },
+  };
+
+  const dummyMessages = [
+    { id: 1, type: 'user', message: 'Hello! Can you help me with something?' },
+    { id: 2, type: 'bot', message: 'Of course! Im here to help. What do you need assistance with?' },
+    { id: 3, type: 'user', message: 'I need information about machine learning.' },
+    { id: 4, type: 'bot', message: 'Machine learning is a field of artificial intelligence that uses statistical techniques to give computer systems the ability to "learn" from data, without being explicitly programmed.' },
+    { id: 5, type: 'user', message: 'Can you give me a simple example?' },
+    { id: 6, type: 'bot', message: 'Think of email spam detection. The system learns from patterns in previous spam emails to identify new ones. It gets better over time as it sees more examples!' },
+  ];
 
   const handleSpeakAnswerExpo = async () => {
     if (!answer) {
@@ -130,17 +163,39 @@ const Voicebot = ({ onClose }) => {
       transparent={false}
       visible={true}
       onRequestClose={onClose}>
-      <ScrollView >
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Voicebot</Text>
-          <Pressable onPress={onClose}>
-            <Text style={styles.closeIcon}>✖</Text>
-          </Pressable>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Voicebot</Text>
+        <Pressable onPress={onClose}>
+          <Text style={styles.closeIcon}>✖</Text>
+        </Pressable>
+      </View>
+      {/* <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
+        <View style={styles.dropdownContainer}>
+          <Picker
+            selectedValue={selectedLanguage}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSelectedLanguage(itemValue)}
+          >
+            {Object.keys(languageMapping).map((lang) => (
+              <Picker.Item key={lang} label={lang} value={lang} />
+            ))}
+          </Picker>
         </View>
-        <View style={styles.modalContent}>
-          <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={() => { Alert.alert('Start Talking Pressed'); }}>
-            Start Talking
-          </Button>
+      </View> */}
+      <ScrollView
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+      >
+        <View>
+          <View>
+            {dummyMessages.map((msg) => (
+              <Message
+                key={msg.id}
+                message={msg.message}
+                type={msg.type}
+              />
+            ))}
+          </View>
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button>
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button>
@@ -170,6 +225,35 @@ const Voicebot = ({ onClose }) => {
           <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button>
         </View>
       </ScrollView>
+      <View>
+        <VoiceAnimation
+          isUserSpeaking={isUserSpeaking}
+          isBotSpeaking={isBotSpeaking}
+        />
+      </View>
+      <View style={styles.headerContainer}>
+        <View style={styles.dropdownContainer}>
+          <Picker
+            selectedValue={selectedLanguage}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSelectedLanguage(itemValue)}
+          >
+            {Object.keys(languageMapping).map((lang) => (
+              <Picker.Item
+                key={lang}
+                label={lang}
+                value={lang}
+                style={styles.pickerItem}
+              />
+            ))}
+          </Picker>
+        </View>
+        <View style={styles.recordingStatus}>
+          <Text style={styles.recordingText}>
+            {isRecording ? 'Recording...' : 'Hold to Record'}
+          </Text>
+        </View>
+      </View>
     </Modal>
   );
 };
@@ -194,14 +278,53 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // padding: 15,
+    height: 80,
+    borderTopColor: '#e0e0e0',
+    borderTopWidth: 1,
+    backgroundColor: '#fff',
+  },
+  dropdownContainer: {
+    flex: 1,
+    maxWidth: '50%',
+    height: 80,
+    justifyContent: 'center',
+    backgroundColor: '#f8f8f8',
+    // borderRadius: 8,
+    // marginRight: 10,
+    paddingHorizontal: 5,
+    borderRightColor: '#e0e0e0',
+    borderRightWidth: 1,
+  },
+  picker: {
+    height: 100,
+    color: '#333',
+  },
+  pickerItem: {
+    fontSize: 14,
+  },
+  recordingStatus: {
+    flex: 1,
+    height: 80,
+    backgroundColor: '#f8f8f8',
+    // borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // borderWidth: 1,
+    // borderColor: '#e0e0e0',
+  },
+  recordingText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666',
+  },
   closeIcon: {
     color: 'white',
     fontSize: 24,
-  },
-  modalContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   centeredView: {
     flex: 1,
