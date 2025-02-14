@@ -28,8 +28,6 @@ const Voicebot = ({ onClose }) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isBotSpeaking, setIsBotSpeaking] = useState(false);
 
-
- 
   const languageMapping = {
     English: { modelLang: "english", tts: "en-IN" },
     Hindi: { modelLang: "hindi", tts: "hi-IN" },
@@ -52,9 +50,7 @@ const Voicebot = ({ onClose }) => {
     console.log(text, "text")
 
   }
-  useEffect(()=>{
 
-  })
   const getTranscriptions = async () => {
     const token = await AsyncStorage.getItem('token');
     if (!token) return;
@@ -81,65 +77,53 @@ const Voicebot = ({ onClose }) => {
     Speech.speak(answer, { language: languageCode });
   }
 
-  useEffect(()=>{
-    if(answer){
-      handleSpeakAnswerEleven();
-    }
-  }, [answer])
-  const handleSpeakAnswerEleven = async () => {
-    setIsBotSpeaking(true);
-    if (!answer) {
-      Alert.alert('No answer available to speak');
-      return;
-    }
-    const token = await AsyncStorage.getItem('token');
-    if (!token) return;
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/voicebot/in`, {
-        text: answer,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const { audio } = response.data;
-      if (audio) {
-        const audioUri = `data:audio/mpeg;base64,${audio}`;
-        const { sound: ttsSound } = await Audio.Sound.createAsync({ uri: audioUri });
-        setSound(ttsSound);
-        await ttsSound.playAsync();
-      }
-    } catch (error) {
-      console.error('Error with TTS:', error.response?.data || error.message);
-    }
-    setIsBotSpeaking(false);
-  };
-  useEffect(()=>{
-    if(transcription){
-      handleProcessQuery();
-    }
-  }, [transcription])
+  // const handleSpeakAnswerEleven = async () => {
+  //   if (!answer) {
+  //     Alert.alert('No answer available to speak');
+  //     return;
+  //   }
+  //   const token = await AsyncStorage.getItem('token');
+  //   if (!token) return;
+  //   try {
+  //     const response = await axios.post(`${BACKEND_URL}/api/voicebot/in`, {
+  //       text: answer,
+  //     }, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     const { audio } = response.data;
+  //     if (audio) {
+  //       const audioUri = `data:audio/mpeg;base64,${audio}`;
+  //       const { sound: ttsSound } = await Audio.Sound.createAsync({ uri: audioUri });
+  //       setSound(ttsSound);
+  //       await ttsSound.playAsync();
+  //     }
+  //   } catch (error) {
+  //     console.error('Error with TTS:', error.response?.data || error.message);
+  //   }
+  // };
 
-  const handleProcessQuery = async () => {
-    
-    if (!transcription) {
-      Alert.alert('No transcription available to process');
-      return;
-    }
-    const token = await AsyncStorage.getItem('token');
-    if (!token) return;
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/voicebot/process`, {
-        transcription,
-        model: "gpt-4o",
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log('Answer:', response);
-      setAnswer(response.data.answer);
-    } catch (error) {
-      console.error('Error processing query:', error.response?.data || error.message);
-      Alert.alert('Error processing query');
-    }
-  };
+
+  // const handleProcessQuery = async () => {
+  //   if (!transcription) {
+  //     Alert.alert('No transcription available to process');
+  //     return;
+  //   }
+  //   const token = await AsyncStorage.getItem('token');
+  //   if (!token) return;
+  //   try {
+  //     const response = await axios.post(`${BACKEND_URL}/api/voicebot/process`, {
+  //       transcription,
+  //       model: "gpt-4o",
+  //     }, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     console.log('Answer:', response);
+  //     setAnswer(response.data.answer);
+  //   } catch (error) {
+  //     console.error('Error processing query:', error.response?.data || error.message);
+  //     Alert.alert('Error processing query');
+  //   }
+  // };
 
   const playSound = async () => {
     if (!audioUri) return;
@@ -152,45 +136,41 @@ const Voicebot = ({ onClose }) => {
     await returnSound.playAsync();
   };
 
-  const uploadRecording = async (audioUri) => {
-    console.log('Uploading recording');
-    const fileInfo = await FileSystem.getInfoAsync(audioUri);
-    if (!fileInfo.exists) {
-      console.error('File does not exist');
-      return;
-    }
-    console.log(fileInfo, 'fileInfo');
-
-    const formData = new FormData();
-    formData.append('file', {
-      uri: audioUri,
-      name: 'recording.m4a',
-      type: 'audio/mp4',
-    });
-    console.log(formData, 'formData');
-
-    const token = await AsyncStorage.getItem('token');
-
+  const uploadRecording = async (uri) => {
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/voicebot/out`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
+      const formData = new FormData();
+      formData.append('file', {
+        uri,
+        name: 'recording.m4a',
+        type: 'audio/mp4',
       });
-      console.log('Transcription:', response.data.data);
+  
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('Authentication required');
+  
+      const response = await axios.post(
+        `${BACKEND_URL}/api/voicebot/out`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.data?.data) {
+        throw new Error('Invalid response from server');
+      }
+      
       return response.data.data;
     } catch (error) {
-      console.error('Error uploading recording', error);
+      console.error('Upload failed:', error);
+      throw new Error('Transcription failed: ' + (error.response?.data?.message || error.message));
     }
   };
-  useEffect(()=>{
-    handleTranscribe();
-  }, [audioUri])
 
   const handleTranscribe = async () => {
-    console.log('Transcribing audio');
-    console.log(audioUri, "audioUri");
     if (!audioUri) {
       console.warn('No audio file available to transcribe');
       return;
@@ -199,7 +179,6 @@ const Voicebot = ({ onClose }) => {
       const transcribedText = await uploadRecording(audioUri);
       console.log(transcribedText, "transcribedText");
       setTranscription(transcribedText);
-
       return transcribedText;
     } catch (error) {
       console.error('Error during transcription:', error);
@@ -207,8 +186,6 @@ const Voicebot = ({ onClose }) => {
   };
 
   const handleStartRecording = async () => {
-    setIsUserSpeaking(true);
-    setIsRecording(true);
     try {
       await startRecording();
     } catch (error) {
@@ -217,8 +194,6 @@ const Voicebot = ({ onClose }) => {
   };
 
   const handleStopRecording = async () => {
-    setIsUserSpeaking(false);
-    setIsRecording(false);
     try {
       await stopRecording();
       await handleConversation();
@@ -227,22 +202,102 @@ const Voicebot = ({ onClose }) => {
     }
   };
 
-  const processVoiceQuery = async ()=>{
-    console.log("processing voice query")
-    try{
-      await handleStopRecording();
-     
-      if(transcription){
-        await handleProcessQuery();
+  const processVoiceQuery = async () => {
+    try {
+      setIsProcessing(true);
+      
+      // 1. Stop recording and get URI directly
+      const uri = await stopRecording();
+      
+      if (!uri) {
+        throw new Error('No recording available');
       }
-      if(answer){
-        await handleSpeakAnswerEleven();
+  
+      // 2. Verify file exists
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (!fileInfo.exists) {
+        throw new Error('Recorded file not found');
       }
-    }catch(e){
-      console.log(e);
-      Alert.alert('Error', e);
+  
+      // 3. Transcribe audio with the direct URI
+      const transcribedText = await uploadRecording(uri);
+      
+      if (!transcribedText?.trim()) {
+        throw new Error('Empty transcription received');
+      }
+      
+      setTranscription(transcribedText);
+  
+      // 4. Process query
+      const processedAnswer = await handleProcessQuery(transcribedText);
+      setAnswer(processedAnswer);
+  
+      // 5. Speak answer
+      await handleSpeakAnswerEleven(processedAnswer);
+  
+    } catch (error) {
+      console.error('Voice processing error:', error);
+      Alert.alert('Error', error.message || 'Processing failed');
+    } finally {
+      setIsProcessing(false);
+      setIsRecording(false);
     }
-  } 
+  };
+  
+  // Modified handleProcessQuery to accept text input
+  const handleProcessQuery = async (text) => {
+    if (!text) {
+      Alert.alert('No text available to process');
+      return;
+    }
+  
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+  
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/voicebot/process`, {
+        transcription: text,
+        model: "gpt-4o",
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      return response.data.answer;
+    } catch (error) {
+      console.error('Error processing query:', error.response?.data || error.message);
+      throw error;
+    }
+  };
+  
+  // Modified handleSpeakAnswerEleven to accept direct text
+  const handleSpeakAnswerEleven = async (text) => {
+    if (!text) {
+      Alert.alert('No text available to speak');
+      return;
+    }
+  
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+  
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/voicebot/in`, {
+        text: text,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const { audio } = response.data;
+      if (audio) {
+        const audioUri = `data:audio/mpeg;base64,${audio}`;
+        const { sound: ttsSound } = await Audio.Sound.createAsync({ uri: audioUri });
+        setSound(ttsSound);
+        await ttsSound.playAsync();
+      }
+    } catch (error) {
+      console.error('Error with TTS:', error.response?.data || error.message);
+      throw error;
+    }
+  };
 
   return (
     <Modal
@@ -326,8 +381,8 @@ const Voicebot = ({ onClose }) => {
             <Text style={{ marginTop: 10 }}>{answer}</Text>
           </View>
         )}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button> */}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button> */}
+        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button>
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button> */}
       </ScrollView>
       <View>
         <VoiceAnimation

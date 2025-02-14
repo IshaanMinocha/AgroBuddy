@@ -12,7 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { Button, Card } from 'react-native-paper';
 import axios from "axios";
-import {MODEL_URI} from "@env"
+
 export default function Detect() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef(null);
@@ -70,29 +70,34 @@ export default function Detect() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("image", {
-        uri: uri,
-        type: "image/jpeg", // Adjust based on your image type
-        name: "photo.jpg",
-      });
-  
-      console.log(MODEL_URI);
-      const res = await axios.post(`${MODEL_URI}/predict`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      console.log(res.data.class, "hello from res");
-      setResult(res.data);
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // const formData = new FormData();
+      // formData.append('image', {
+      //   uri: uri,
+      //   type: 'image/jpeg',
+      //   name: 'image.jpg',
+      // });
+      // const data = await axios.post('/api/image-analysis', formData, {
+      //   headers: {
+      //     'Accept': 'application/json',
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+
+      const dummyData = {
+        disease: "Tomato Late Blight",
+        confidence: 0.89
+      };
+
+      setResult(dummyData);
+      // setResult(data);
     } catch (err) {
-      setError("Failed to analyze image. Please try again.");
-      console.error("API Error:", err);
+      setError('Failed to analyze image. Please try again.');
+      console.error('API Error:', err);
     } finally {
       setLoading(false);
     }
-   
   };
 
   const getRecommendations = async () => {
@@ -102,8 +107,8 @@ export default function Detect() {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // const result = await axios.post(`${MODEL_URI}/predict`, result);
-      console.log(result);
+      // const result = await axios.post('/api/disease-recommendations', result);
+
       const dummyRecommendations = "1. Remove and destroy infected plant parts\n2. Apply fungicide every 7-10 days\n3. Improve air circulation between plants\n4. Water at the base of plants to avoid wet foliage";
 
       setRecommendations(dummyRecommendations);
@@ -168,11 +173,10 @@ export default function Detect() {
               Analysis Result
             </Text>
             <Text variant="bodyLarge" style={styles.resultText}>
-              Disease: {result?.class}
+              Disease: {result?.disease}
             </Text>
             <Text variant="bodyMedium" style={styles.confidence}>
-              {/* Confidence: {(result.confidence * 100).toFixed(2)}% */}
-              Confidence: {80}%
+              Confidence: {(result.confidence * 100).toFixed(2)}%
             </Text>
             <Button
               mode="outlined"

@@ -87,7 +87,6 @@ const Voicebot = ({ onClose }) => {
     }
   }, [answer])
   const handleSpeakAnswerEleven = async () => {
-    setIsBotSpeaking(true);
     if (!answer) {
       Alert.alert('No answer available to speak');
       return;
@@ -109,8 +108,7 @@ const Voicebot = ({ onClose }) => {
       }
     } catch (error) {
       console.error('Error with TTS:', error.response?.data || error.message);
-    }
-    setIsBotSpeaking(false);
+    }finally
   };
   useEffect(()=>{
     if(transcription){
@@ -119,7 +117,7 @@ const Voicebot = ({ onClose }) => {
   }, [transcription])
 
   const handleProcessQuery = async () => {
-    
+    setIsBotSpeaking(true);
     if (!transcription) {
       Alert.alert('No transcription available to process');
       return;

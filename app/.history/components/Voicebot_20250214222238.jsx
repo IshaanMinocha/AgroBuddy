@@ -28,8 +28,6 @@ const Voicebot = ({ onClose }) => {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isBotSpeaking, setIsBotSpeaking] = useState(false);
 
-
- 
   const languageMapping = {
     English: { modelLang: "english", tts: "en-IN" },
     Hindi: { modelLang: "hindi", tts: "hi-IN" },
@@ -52,9 +50,7 @@ const Voicebot = ({ onClose }) => {
     console.log(text, "text")
 
   }
-  useEffect(()=>{
 
-  })
   const getTranscriptions = async () => {
     const token = await AsyncStorage.getItem('token');
     if (!token) return;
@@ -81,13 +77,7 @@ const Voicebot = ({ onClose }) => {
     Speech.speak(answer, { language: languageCode });
   }
 
-  useEffect(()=>{
-    if(answer){
-      handleSpeakAnswerEleven();
-    }
-  }, [answer])
   const handleSpeakAnswerEleven = async () => {
-    setIsBotSpeaking(true);
     if (!answer) {
       Alert.alert('No answer available to speak');
       return;
@@ -110,16 +100,10 @@ const Voicebot = ({ onClose }) => {
     } catch (error) {
       console.error('Error with TTS:', error.response?.data || error.message);
     }
-    setIsBotSpeaking(false);
   };
-  useEffect(()=>{
-    if(transcription){
-      handleProcessQuery();
-    }
-  }, [transcription])
+
 
   const handleProcessQuery = async () => {
-    
     if (!transcription) {
       Alert.alert('No transcription available to process');
       return;
@@ -184,13 +168,8 @@ const Voicebot = ({ onClose }) => {
       console.error('Error uploading recording', error);
     }
   };
-  useEffect(()=>{
-    handleTranscribe();
-  }, [audioUri])
 
   const handleTranscribe = async () => {
-    console.log('Transcribing audio');
-    console.log(audioUri, "audioUri");
     if (!audioUri) {
       console.warn('No audio file available to transcribe');
       return;
@@ -199,7 +178,6 @@ const Voicebot = ({ onClose }) => {
       const transcribedText = await uploadRecording(audioUri);
       console.log(transcribedText, "transcribedText");
       setTranscription(transcribedText);
-
       return transcribedText;
     } catch (error) {
       console.error('Error during transcription:', error);
@@ -207,8 +185,6 @@ const Voicebot = ({ onClose }) => {
   };
 
   const handleStartRecording = async () => {
-    setIsUserSpeaking(true);
-    setIsRecording(true);
     try {
       await startRecording();
     } catch (error) {
@@ -217,8 +193,6 @@ const Voicebot = ({ onClose }) => {
   };
 
   const handleStopRecording = async () => {
-    setIsUserSpeaking(false);
-    setIsRecording(false);
     try {
       await stopRecording();
       await handleConversation();
@@ -226,23 +200,6 @@ const Voicebot = ({ onClose }) => {
       Alert.alert('Error', 'Failed to stop recording');
     }
   };
-
-  const processVoiceQuery = async ()=>{
-    console.log("processing voice query")
-    try{
-      await handleStopRecording();
-     
-      if(transcription){
-        await handleProcessQuery();
-      }
-      if(answer){
-        await handleSpeakAnswerEleven();
-      }
-    }catch(e){
-      console.log(e);
-      Alert.alert('Error', e);
-    }
-  } 
 
   return (
     <Modal
@@ -303,7 +260,7 @@ const Voicebot = ({ onClose }) => {
           </View> */}
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
         <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button> */}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button> */}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button>
         {audioUri && (
           <View>
             <Text style={{ marginTop: 20 }}>
@@ -319,15 +276,15 @@ const Voicebot = ({ onClose }) => {
             </Text>
           </View>
         )}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button> */}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button>
         {answer !== '' && (
           <View>
             <Text style={{ marginTop: 20, fontSize: 16 }}>Answer:</Text>
             <Text style={{ marginTop: 10 }}>{answer}</Text>
           </View>
         )}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button> */}
-        {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button> */}
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button>
+        <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button>
       </ScrollView>
       <View>
         <VoiceAnimation
@@ -354,7 +311,7 @@ const Voicebot = ({ onClose }) => {
         </View>
         <Pressable
           onPressIn={handleStartRecording}
-          onPressOut={processVoiceQuery}
+          onPressOut={()}
           // disabled={isProcessing || isBotSpeaking}
           style={styles.recordingStatus}>
           <Text style={styles.recordingText}>

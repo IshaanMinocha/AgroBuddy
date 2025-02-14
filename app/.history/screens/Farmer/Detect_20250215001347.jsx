@@ -69,30 +69,13 @@ export default function Detect() {
     setLoading(true);
     setError(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("image", {
-        uri: uri,
-        type: "image/jpeg", // Adjust based on your image type
-        name: "photo.jpg",
-      });
-  
-      console.log(MODEL_URI);
-      const res = await axios.post(`${MODEL_URI}/predict`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
-      console.log(res.data.class, "hello from res");
-      setResult(res.data);
+   
     } catch (err) {
-      setError("Failed to analyze image. Please try again.");
-      console.error("API Error:", err);
+      setError('Failed to analyze image. Please try again.');
+      console.error('API Error:', err);
     } finally {
       setLoading(false);
     }
-   
   };
 
   const getRecommendations = async () => {
@@ -168,11 +151,10 @@ export default function Detect() {
               Analysis Result
             </Text>
             <Text variant="bodyLarge" style={styles.resultText}>
-              Disease: {result?.class}
+              Disease: {result?.disease}
             </Text>
             <Text variant="bodyMedium" style={styles.confidence}>
-              {/* Confidence: {(result.confidence * 100).toFixed(2)}% */}
-              Confidence: {80}%
+              Confidence: {(result.confidence * 100).toFixed(2)}%
             </Text>
             <Button
               mode="outlined"

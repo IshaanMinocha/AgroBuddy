@@ -110,7 +110,6 @@ const Voicebot = ({ onClose }) => {
     } catch (error) {
       console.error('Error with TTS:', error.response?.data || error.message);
     }
-    setIsBotSpeaking(false);
   };
   useEffect(()=>{
     if(transcription){

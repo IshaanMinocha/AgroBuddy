@@ -85,7 +85,7 @@ export default function Detect() {
       });
   
       console.log(res.data.class, "hello from res");
-      setResult(res.data);
+      setResult(res.data.);
     } catch (err) {
       setError("Failed to analyze image. Please try again.");
       console.error("API Error:", err);
@@ -168,11 +168,10 @@ export default function Detect() {
               Analysis Result
             </Text>
             <Text variant="bodyLarge" style={styles.resultText}>
-              Disease: {result?.class}
+              Disease: {result?.disease}
             </Text>
             <Text variant="bodyMedium" style={styles.confidence}>
-              {/* Confidence: {(result.confidence * 100).toFixed(2)}% */}
-              Confidence: {80}%
+              Confidence: {(result.confidence * 100).toFixed(2)}%
             </Text>
             <Button
               mode="outlined"

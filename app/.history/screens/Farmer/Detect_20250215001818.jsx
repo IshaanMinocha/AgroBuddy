@@ -171,8 +171,7 @@ export default function Detect() {
               Disease: {result?.class}
             </Text>
             <Text variant="bodyMedium" style={styles.confidence}>
-              {/* Confidence: {(result.confidence * 100).toFixed(2)}% */}
-              Confidence: {80}%
+              Confidence: {(result.confidence * 100).toFixed(2) || 80}%
             </Text>
             <Button
               mode="outlined"

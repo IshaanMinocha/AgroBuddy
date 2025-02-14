@@ -32,7 +32,7 @@ export default function useAudioRecorder() {
     if (!recording) return;
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
-    console.log('Recording stopped and stored at', uri);
+    console.log()
     setAudioUri(uri);
     setRecording(null);
   };
