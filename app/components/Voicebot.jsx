@@ -46,15 +46,20 @@ const Voicebot = ({ onClose }) => {
     Sanskrit: { modelLang: "sanskrit", tts: "sa-IN" },
   };
 
+  const resetState = () =>{
+    setTranscription('');
+    setAnswer('');
+    stopSound();
+    
+  }
+
   const handleConversation = async () => {
     console.log("first")
     const text = await handleTranscribe();
     console.log(text, "text")
 
   }
-  useEffect(()=>{
-
-  })
+ 
   const getTranscriptions = async () => {
     const token = await AsyncStorage.getItem('token');
     if (!token) return;
@@ -151,6 +156,13 @@ const Voicebot = ({ onClose }) => {
     console.log('Playing sound...');
     await returnSound.playAsync();
   };
+  const stopSound = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+    }
+  };
 
   const uploadRecording = async (audioUri) => {
     console.log('Uploading recording');
@@ -185,7 +197,9 @@ const Voicebot = ({ onClose }) => {
     }
   };
   useEffect(()=>{
-    handleTranscribe();
+    if(audioUri){
+      handleTranscribe();
+    }
   }, [audioUri])
 
   const handleTranscribe = async () => {
@@ -207,6 +221,7 @@ const Voicebot = ({ onClose }) => {
   };
 
   const handleStartRecording = async () => {
+    resetState();
     setIsUserSpeaking(true);
     setIsRecording(true);
     try {
@@ -253,7 +268,7 @@ const Voicebot = ({ onClose }) => {
       <View style={styles.header}>
         <Text style={styles.headerText}>Voicebot</Text>
         <Pressable onPress={onClose}>
-          <Text style={styles.closeIcon}>✖</Text>
+          <Text style={styles.closeIcon} onPress={stopSound()}>✖</Text>
         </Pressable>
       </View>
       {/* <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
@@ -304,7 +319,7 @@ const Voicebot = ({ onClose }) => {
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={startRecording} >Start Recording</Button>
         <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={stopRecording} >Stop Recording</Button> */}
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleTranscribe} >Upload Recording</Button> */}
-        {audioUri && (
+        {/* {audioUri && (
           <View>
             <Text style={{ marginTop: 20 }}>
               Recorded Audio URI: {audioUri}
@@ -318,14 +333,14 @@ const Voicebot = ({ onClose }) => {
               Transcription: {transcription}
             </Text>
           </View>
-        )}
+        )} */}
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleProcessQuery} >Process Query</Button> */}
-        {answer !== '' && (
+        {/* {answer !== '' && (
           <View>
             <Text style={{ marginTop: 20, fontSize: 16 }}>Answer:</Text>
             <Text style={{ marginTop: 10 }}>{answer}</Text>
           </View>
-        )}
+        )} */}
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerExpo} >Speak Answer Expo</Button> */}
         {/* <Button style={{ margin: 50, marginTop: 10 }} icon="microphone" mode="contained" onPress={handleSpeakAnswerEleven} >Speak Answer Eleven</Button> */}
       </ScrollView>
