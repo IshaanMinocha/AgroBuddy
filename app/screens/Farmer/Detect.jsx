@@ -12,7 +12,8 @@ import { Feather } from "@expo/vector-icons";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { Button, Card } from 'react-native-paper';
 import axios from "axios";
-import {MODEL_URI} from "@env"
+import { MODEL_URI, BACKEND_URL } from "@env"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Detect() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef(null);
@@ -76,23 +77,23 @@ export default function Detect() {
         type: "image/jpeg", // Adjust based on your image type
         name: "photo.jpg",
       });
-  
+
       console.log(MODEL_URI);
       const res = await axios.post(`${MODEL_URI}/predict`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       console.log(res.data.class, "hello from res");
-      setResult(res.data);
+      setResult(res.data.class);
     } catch (err) {
       setError("Failed to analyze image. Please try again.");
       console.error("API Error:", err);
     } finally {
       setLoading(false);
     }
-   
+
   };
 
   const getRecommendations = async () => {
@@ -100,14 +101,19 @@ export default function Detect() {
     setError(null);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
+      console.log(BACKEND_URL, "url");
+      console.log(token, "token");
+      console.log(result, "result");
 
-      // const result = await axios.post(`${MODEL_URI}/predict`, result);
-      console.log(result);
-      const dummyRecommendations = "1. Remove and destroy infected plant parts\n2. Apply fungicide every 7-10 days\n3. Improve air circulation between plants\n4. Water at the base of plants to avoid wet foliage";
-
-      setRecommendations(dummyRecommendations);
-      // setRecommendations(results);
+      const res = await axios.post(`${BACKEND_URL}/api/recommendation/chat`, { prompt: result, usecase: "disease" }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(res.data.answer, "res");
+      setRecommendations(res.data.answer);
     } catch (err) {
       setError('Failed to give recommendations. Please try again.');
       console.error('API Error:', err);
@@ -168,12 +174,12 @@ export default function Detect() {
               Analysis Result
             </Text>
             <Text variant="bodyLarge" style={styles.resultText}>
-              Disease: {result?.class}
+              Disease: {result}
             </Text>
-            <Text variant="bodyMedium" style={styles.confidence}>
-              {/* Confidence: {(result.confidence * 100).toFixed(2)}% */}
+            {/* <Text variant="bodyMedium" style={styles.confidence}>
+              Confidence: {(result.confidence * 100).toFixed(2)}% 
               Confidence: {80}%
-            </Text>
+            </Text>*/}
             <Button
               mode="outlined"
               onPress={getRecommendations}

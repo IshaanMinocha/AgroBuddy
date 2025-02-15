@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '../../context/authContext';
 
 const ProfileSection = ({ title, children }) => (
     <View style={styles.section}>
@@ -23,15 +24,18 @@ const MenuItem = ({ icon, title, subtitle, onPress }) => (
 );
 
 const Profile = () => {
+
+    const [state, setState] = useContext(AuthContext);
+
     return (
         <ScrollView style={styles.container}>
             {/* Header Section */}
             <View style={styles.header}>
                 <View style={styles.avatarContainer}>
-                    <Text style={styles.avatarText}>JD</Text>
+                    <Text style={styles.avatarText}>{state?.user?.name.charAt(0).toUpperCase()}</Text>
                 </View>
-                <Text style={styles.farmerName}>John Doe</Text>
-                <Text style={styles.farmName}>Green Acres Farm</Text>
+                <Text style={styles.farmerName}>{state?.user?.name}</Text>
+                <Text style={styles.farmName}>Farmer in Delhi</Text>
             </View>
 
             {/* Farm Details Section */}
@@ -40,19 +44,19 @@ const Profile = () => {
                     icon="leaf"
                     title="Crop History"
                     subtitle="View past and current crops"
-                    onPress={() => { }}
+                    onPress={() => { Alert.alert('View past and current crops', "from your farm") }}
                 />
                 <MenuItem
                     icon="resize"
                     title="Land Size"
                     subtitle="50 acres"
-                    onPress={() => { }}
+                    onPress={() => { Alert.alert('50 acres of land', "in your farm") }}
                 />
                 <MenuItem
                     icon="hardware-chip"
                     title="IoT Devices"
-                    subtitle="4 devices connected"
-                    onPress={() => { }}
+                    subtitle="0 devices connected"
+                    onPress={() => { Alert.alert('No IoT devices connected') }}
                 />
             </ProfileSection>
 

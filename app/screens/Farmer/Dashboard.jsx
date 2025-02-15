@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   return (
     <View style={styles.container}>
-      <Header state={state} />
+      {currentPage !== 'dashboard' && (< Header state={state} />)}
       {currentPage !== 'detect' && (
         <IconButton
           icon="microphone"

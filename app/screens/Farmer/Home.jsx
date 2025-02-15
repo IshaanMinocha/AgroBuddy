@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import {
   StatusBar
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { AuthContext } from '../../context/authContext';
+import { IconButton } from 'react-native-paper';
 
 const weatherData = [
   { id: '1', time: '10:00', temp: '28°', condition: 'sunny' },
@@ -140,17 +142,31 @@ const GovtSchemes = () => (
   </View>
 );
 
+const logout = async () => {
+  try {
+    await AsyncStorage.removeItem('userData');
+    await AsyncStorage.removeItem('token');
+    setState({ user: null, token: '' });
+    console.log("logged out");
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+
 const Home = () => {
+
+  const [state, setState] = useContext(AuthContext);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>John Smith</Text>
+          <Text style={styles.userName}>{state?.user?.name}</Text>
         </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <MaterialIcons name="person" size={24} color="#FFF" />
+        <TouchableOpacity onPress={logout}>
+          <IconButton icon="logout" size={30} iconColor='#fff' />
         </TouchableOpacity>
       </View>
 
@@ -160,10 +176,10 @@ const Home = () => {
           <WeatherCard />
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <SectionTitle title="Crop Health" subtitle="Real-time metrics" />
           <CropMetrics />
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <SectionTitle title="Quick Actions" />

@@ -8,4 +8,70 @@ export const processQueryPrompt = `
     Remember, Your goal is to offer straightforward, reliable guidance that farmers can easily understand and implement.
     Also, i want answer in a small paragraph of maximum 100 words.
     Here is the query:
-`;
+    `;
+
+export const cropRecommendationPrompt = `
+    suggest detailed measures to improve the yield.
+    `;
+
+export const diseaseDetectionPrompt = `
+    Given the crop disease, provide exactly 3 Do's and 3 Don'ts to improve crop condition and yield. Each point should be concise, practical, and based on agricultural best practices. Format the response with relevant icons for each point with \n after each point as seperator.
+    if there is no disease("healthy" at last of disease name), reply with "Crop is already healthy".
+    Disease name:
+    `;
+
+export const yieldPredictionPrompt = `
+    I will provide you with a crop name and its environmental & soil conditions. Your task is to analyze these values by comparing them with the ideal conditions for that crop. Then, suggest detailed measures to improve the yield.
+    
+    Input Format:
+    Crop: [Crop Name]
+    Temperature (°C): [Value]
+    Humidity (%): [Value]
+    Soil Moisture: [Value]
+    Nitrogen (N): [Value]
+    Phosphorus (P): [Value]
+    Potassium (K): [Value]
+    pH: [Value]
+    Output Requirements:
+    Comparison with Ideal Conditions:
+    
+    Provide the optimal range for each parameter.
+    Indicate whether the current values are within range (✅) or need adjustment (❌).
+    Recommended Measures to Improve Yield:
+    
+    Humidity Management: Methods to increase or decrease humidity based on crop needs.
+    Soil Moisture Improvement: Suggest irrigation techniques, mulching, or soil amendments.
+    Nutrient Adjustment: Provide organic and inorganic fertilizers to optimize NPK levels.
+    Soil pH Correction: Suggest amendments like lime (to increase pH) or sulfur (to decrease pH).
+    Advanced Farming Techniques: Recommend precision farming, intercropping, or disease prevention methods.
+    Example Input:
+    yaml
+    Copy
+    Edit
+    Crop: Rice  
+    Temperature (°C): 30  
+    Humidity (%): 45  
+    Soil Moisture: 53  
+    N: 70  
+    P: 40  
+    K: 17  
+    pH: 5.77  
+    Expected Output:
+    Current Conditions for Mango:
+    Temperature: 30°C (✅ Ideal)
+    Humidity: 45% (❌ Slightly Low)
+    Soil Moisture: 53% (❌ Needs Increase)
+    N (Nitrogen): 70 (❌ Slightly Low)
+    P (Phosphorus): 40 (✅ Good)
+    K (Potassium): 17 (❌ Too Low)
+    pH: 5.77 (❌ Slightly Acidic)
+    Recommended Measures:
+    Increase Humidity: Use misting systems, windbreaks, and organic mulching.
+    Improve Soil Moisture: Apply deep irrigation and mulching with dry leaves/straw.
+    Optimize Nutrients: Add compost, farmyard manure (FYM), and potassium-rich fertilizers.
+    Adjust Soil pH: Apply lime (calcium carbonate) to increase pH slightly.
+    Adopt Advanced Techniques: Use drip irrigation, grafting for better fruiting, and organic pesticides for disease control.
+    By implementing these changes, the farmer can significantly improve crop yield.
+    Maximum 200 words strictly
+    give pointers only if necessary.
+    `;
