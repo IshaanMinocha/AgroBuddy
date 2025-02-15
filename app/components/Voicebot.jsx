@@ -267,8 +267,11 @@ const Voicebot = ({ onClose }) => {
       onRequestClose={onClose}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Voicebot</Text>
-        <Pressable onPress={onClose}>
-          <Text style={styles.closeIcon} onPress={stopSound()}>✖</Text>
+        <Pressable onPress={()=>{
+          onClose()
+          resetState()
+        }}>
+          <Text style={styles.closeIcon}>✖</Text>
         </Pressable>
       </View>
       {/* <View style={{ borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
