@@ -17,7 +17,8 @@
         "buildType": "apk"
       },
       "env": {
-        "BACKEND_URL": "https://agrobuddy.onrender.com"
+        "BACKEND_URL": "http://agroserver.sujalchauhan.in",
+        "MODEL_URI": "http://agromodels.sujalchauhan.in"
       }
     }
   },
@@ -25,5 +26,4 @@
     "production": {}
   }
 }
-
 // eas build --platform android --profile production

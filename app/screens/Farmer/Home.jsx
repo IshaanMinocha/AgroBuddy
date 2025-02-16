@@ -13,6 +13,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/authContext';
 import { IconButton } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const weatherData = [
   { id: '1', time: '10:00', temp: '28°', condition: 'sunny' },
@@ -143,6 +144,7 @@ const GovtSchemes = () => (
 );
 
 const logout = async () => {
+  const [state, setState] = useContext(AuthContext);
   try {
     await AsyncStorage.removeItem('userData');
     await AsyncStorage.removeItem('token');
