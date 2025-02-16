@@ -5,6 +5,9 @@ A comprehensive AI-powered solution for farmers to enhance agricultural producti
 ## Live Demo
 [agrobuddy.ishaanminocha.in](https://agrobuddy.ishaanminocha.in/)
 
+## Demo Video
+[![Watch the video](https://img.youtube.com/vi/Sb73pakmZqs/0.jpg)](https://www.youtube.com/watch?v=Sb73pakmZqs)
+
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
