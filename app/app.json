@@ -11,6 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#171717"
     },
+    "manifestPlaceholders": {
+      "appAuthRedirectScheme": "agrobuddy"
+    },
     "plugins": [
       [
         "expo-camera",
@@ -33,9 +36,12 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location services to track your location.",
         "NSLocationWhenInUseUsageDescription": "This app uses location services to track your location.",
         "UIBackgroundModes": [
+          "location",
           "location"
-        ]
-      }
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.ishaanminocha.agrobuddy"
     },
     "android": {
       "adaptiveIcon": {
@@ -54,7 +60,25 @@
           "apiKey": ""
         }
       },
-      "package": "com.ishaanminocha.agrobuddy"
+      "package": "com.ishaanminocha.agrobuddy",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "agrobuddy.ishaanminocha.in"
+            },
+            {
+              "scheme": "agrobuddy"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/logo.png"

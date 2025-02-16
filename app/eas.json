@@ -16,6 +16,10 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "simulator": false, 
+        "buildConfiguration": "Release"
+      },
       "env": {
         "BACKEND_URL": "http://agroserver.sujalchauhan.in",
         "MODEL_URI": "http://agromodels.sujalchauhan.in"
@@ -26,4 +30,5 @@
     "production": {}
   }
 }
+
 // eas build --platform android --profile production
