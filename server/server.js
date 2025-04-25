@@ -5,6 +5,7 @@ import cors from 'cors';
 import userRouter from './api/user/route.js';
 import voicebotRouter from './api/voicebot/route.js';
 import recommendationRouter from './api/recommendation/route.js';
+import espActionRouter from './api/esp-action/route.js';
 
 envConfig();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/user', userRouter);
 app.use('/api/voicebot', voicebotRouter);
 app.use('/api/recommendation', recommendationRouter);
+app.use('/api/esp-action', espActionRouter)
 
 const startServer = async () => {
     try {

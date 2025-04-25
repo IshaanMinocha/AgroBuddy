@@ -95,7 +95,25 @@ export default function Detect() {
     }
 
   };
+  const sendAction = async (action) =>{
+    try{
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
 
+      const res = await axios.post(`${BACKEND_URL}/api/esp-action`, { action }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(res.data, "res");
+      if(res.data.success){
+        console.log("Action sent successfully");
+      }
+    }catch(e){
+      console.error('Processing query error:', e.response ? e.response.data : e.message);
+      setError('Failed to process action. Please try again.');
+    }
+  }
   const getRecommendations = async () => {
     setLoadingRecommendations(true);
     setError(null);
@@ -114,6 +132,7 @@ export default function Detect() {
       });
       console.log(res.data.answer, "res");
       setRecommendations(res.data.answer);
+      await sendAction(res.data.answer)
     } catch (err) {
       setError('Failed to give recommendations. Please try again.');
       console.error('API Error:', err);

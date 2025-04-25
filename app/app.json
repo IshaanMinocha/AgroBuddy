@@ -44,7 +44,10 @@
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "config": {
         "googleMaps": {
@@ -58,7 +61,7 @@
     },
     "extra": {
       "eas": {
-        // "projectId": "8ce5820f-ed2a-4592-892d-49dfe96240e8"
+        "projectId": "8cd8be85-3826-4c29-8664-3937fc9d341f"
       }
     }
   }
