@@ -100,7 +100,7 @@ export default function Detect() {
       const token = await AsyncStorage.getItem('token');
       if (!token) return;
 
-      const res = await axios.post(`${BACKEND_URL}/api/esp-action`, { action }, {
+      const res = await axios.post(`${BACKEND_URL}/api/esp-action/post-action`, { action }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
