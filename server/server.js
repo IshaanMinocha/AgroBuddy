@@ -6,7 +6,7 @@ import userRouter from './api/user/route.js';
 import voicebotRouter from './api/voicebot/route.js';
 import recommendationRouter from './api/recommendation/route.js';
 import espActionRouter from './api/esp-action/route.js';
-
+import getWeatherDataRouter from './api/get-weather-data/route.js';
 envConfig();
 
 const app = express();
@@ -22,6 +22,7 @@ app.use('/api/user', userRouter);
 app.use('/api/voicebot', voicebotRouter);
 app.use('/api/recommendation', recommendationRouter);
 app.use('/api/esp-action', espActionRouter)
+app.use('/api/getWeatherData', getWeatherDataRouter);
 
 const startServer = async () => {
     try {

@@ -1,8 +1,8 @@
 import express from 'express';
-import { espAction } from './controller';
+import { espAction } from './controller.js';
 
 const router = express.Router();
 
-router.route("/esp-action").post(espAction);
+router.route("/post-action").post(espAction);
 
 export default router;

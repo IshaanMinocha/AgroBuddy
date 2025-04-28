@@ -1,5 +1,0 @@
-BACKEND_URL=http://192.168.1.3:5000
-# BACKEND_URL=http://agroserver.sujalchauhan.in
-WEATHER_API_KEY=c3d07ea1d2634dfba99222629251402
-# MODEL_URI=http://agromodels.sujalchauhan.in
-MODEL_URI=http://192.168.1.3:3010
