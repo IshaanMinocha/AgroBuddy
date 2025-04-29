@@ -11,8 +11,50 @@ import { LineChart } from 'react-native-chart-kit';
 import { MODEL_URI, BACKEND_URL } from "@env"
 import axios from "axios"
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
+import {BACKEND_URL} from '@env'
 
 const YieldMonitoringPage = () => {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const handleGetLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc);
+      sendLocationToAPI(loc.coords.latitude, loc.coords.longitude);
+
+    } catch (error) {
+      setErrorMsg(error.message);
+    }
+  };
+
+  const sendLocationToAPI = async(lat, lon) => {
+    try{
+      const res = await axios.get(`${BACKEND_URL}/api/getWeatherData?lat=${lat}&lon=${lon}`);
+      
+      setRecommendationData(prev => ({
+        ...prev,
+        temperature: res.data.temp,
+        humidity: res.data.humidity
+      }));
+      setYieldData(prev => ({
+        ...prev,
+        temperature: res.data.temp,
+        humidity: res.data.humidity
+      }));
+      console.log(recommendationData, yieldData, "weather data");
+
+    }catch(e){
+      console.error('Error getting weather data:', e);
+    }
+  };
+
   const [recommendationData, setRecommendationData] = useState({
     nitrogen: '90',
     phosphorus: '42',
