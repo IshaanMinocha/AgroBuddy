@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Dimensions, Text, TouchableOpacity, TextInput } from 'react-native';
 import {
   Card, Title, Paragraph, Appbar, Surface, IconButton,
@@ -12,8 +12,7 @@ import { MODEL_URI, BACKEND_URL } from "@env"
 import axios from "axios"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import {BACKEND_URL} from '@env'
-
+ 
 const YieldMonitoringPage = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -28,51 +27,56 @@ const YieldMonitoringPage = () => {
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc);
       sendLocationToAPI(loc.coords.latitude, loc.coords.longitude);
-
+    
     } catch (error) {
       setErrorMsg(error.message);
     }
   };
 
+  useEffect(()=>{
+    handleGetLocation();
+  }, []);
+
   const sendLocationToAPI = async(lat, lon) => {
     try{
       const res = await axios.get(`${BACKEND_URL}/api/getWeatherData?lat=${lat}&lon=${lon}`);
-      
+      console.log(res.data, "weather data aa");
+   
       setRecommendationData(prev => ({
         ...prev,
-        temperature: res.data.temp,
-        humidity: res.data.humidity
+        temperature: (Math.round((res.data.data.temperature-273)*100)/100)?.toString() || '',
+        humidity: res.data.data.humidity?.toString() || '',
+        nitrogen: prev.nitrogen || '',
+        phosphorus: prev.phosphorus || '',
+        potassium: prev.potassium || '',
+        ph: prev.ph || '',
+        rainfall: prev.rainfall || ''
       }));
+      
       setYieldData(prev => ({
         ...prev,
-        temperature: res.data.temp,
-        humidity: res.data.humidity
+        temperature: (Math.round((res.data.data.temperature-273)*100)/100)?.toString() || '',
+        humidity: res.data.data.humidity?.toString() || '',
+  
+        soil_moisture: prev.soil_moisture || '',
+        area: prev.area || '',
+        season: prev.season || '',
+        crop: prev.crop || ''
       }));
-      console.log(recommendationData, yieldData, "weather data");
 
-    }catch(e){
+    } catch(e){
       console.error('Error getting weather data:', e);
     }
   };
 
-  const [recommendationData, setRecommendationData] = useState({
-    nitrogen: '90',
-    phosphorus: '42',
-    potassium: '43',
-    temperature: '20.8',
-    humidity: '82',
-    ph: '6.5',
-    rainfall: '202.9'
-  });
+  // useEffect(()=>{
+  //   console.log(recommendationData, "recommendation data");
+  //   console.log(yieldData, "yield data");
+  // }, [recommendationData, yieldData]);
 
-  const [yieldData, setYieldData] = useState({
-    temperature: '30',
-    humidity: '50',
-    soil_moisture: '55',
-    area: '1000',
-    season: 'Kharif',
-    crop: 'Rice'
-  });
+  const [recommendationData, setRecommendationData] = useState({});
+
+  const [yieldData, setYieldData] = useState({});
 
   const handleRecommendationChange = (name, value) => {
     setRecommendationData(prev => ({

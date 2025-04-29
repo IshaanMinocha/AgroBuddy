@@ -91,13 +91,16 @@ const RegisterSection = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleRegister = async () => {
+        console.log(BACKEND_URL);
         try {
             const response = await axios.post(`${BACKEND_URL}/api/user/register`, { name, mobile: phone, password });
+            console.log(response.data);
             if (response.data?.user) {
                 Alert.alert("Success", response.data.message);
                 navigation.navigate(response.data.user.role === 'worker' ? "WorkerDashboard" : "ManagerDashboard");
             }
         } catch (error) {
+            console.log(error);
             Alert.alert("Registration Failed", error.response?.data?.message || "An error occurred");
         }
     };
