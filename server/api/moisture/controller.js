@@ -6,7 +6,7 @@ const getMoisture = asyncHandler(async (req, res) => {
     const esp32Ip = process.env.ESP32_IP;
 
     try {
-        const response = await axios.get(`${esp32Ip}`, { timeout: 2000 });
+        const response = await axios.get(`${esp32Ip}`, { timeout: 5000 });
 
         if (!response.data.moisture) {
             throw new Error('moisture not available');
