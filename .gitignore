@@ -6,7 +6,7 @@ node_modules/
 .expo/
 dist/
 web-build/
-
+venv/
 # Native
 *.orig.*
 *.jks
