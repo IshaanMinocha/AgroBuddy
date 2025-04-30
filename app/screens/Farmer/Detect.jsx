@@ -3,29 +3,38 @@ import {
   CameraType,
   CameraView,
   useCameraPermissions,
-} from "expo-camera";
-import { useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, ScrollView } from "react-native";
-import { Image } from "expo-image";
-import { AntDesign } from "@expo/vector-icons";
-import { Feather } from "@expo/vector-icons";
-import { FontAwesome6 } from "@expo/vector-icons";
+} from 'expo-camera';
+import { useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { Image } from 'expo-image';
+import { AntDesign } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { Button, Card } from 'react-native-paper';
-import axios from "axios";
-import { MODEL_URI, BACKEND_URL } from "@env"
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
+import { MODEL_URI, BACKEND_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Detect() {
   const [permission, requestPermission] = useCameraPermissions();
   const ref = useRef(null);
   const [uri, setUri] = useState(null);
-  const [mode, setMode] = useState("picture");
-  const [facing, setFacing] = useState("back");
+  const [mode, setMode] = useState('picture');
+  const [facing, setFacing] = useState('back');
   const [recording, setRecording] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [recommendations, setRecommendations] = useState(null);
+  const [action, setAction] = useState("");
 
   if (!permission) {
     return null;
@@ -34,10 +43,12 @@ export default function Detect() {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: "center", marginBottom: 20, fontSize: 18 }}>
+        <Text style={{ textAlign: 'center', marginBottom: 20, fontSize: 18 }}>
           click below to use the camera
         </Text>
-        <Button icon="camera" mode="contained" onPress={requestPermission}>Grant Permission</Button>
+        <Button icon="camera" mode="contained" onPress={requestPermission}>
+          Grant Permission
+        </Button>
       </View>
     );
   }
@@ -59,11 +70,11 @@ export default function Detect() {
   };
 
   const toggleMode = () => {
-    setMode((prev) => (prev === "picture" ? "video" : "picture"));
+    setMode((prev) => (prev === 'picture' ? 'video' : 'picture'));
   };
 
   const toggleFacing = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"));
+    setFacing((prev) => (prev === 'back' ? 'front' : 'back'));
   };
 
   const detectDisease = async () => {
@@ -72,48 +83,54 @@ export default function Detect() {
 
     try {
       const formData = new FormData();
-      formData.append("image", {
+      formData.append('image', {
         uri: uri,
-        type: "image/jpeg", // Adjust based on your image type
-        name: "photo.jpg",
+        type: 'image/jpeg', // Adjust based on your image type
+        name: 'photo.jpg',
       });
 
       console.log(MODEL_URI);
       const res = await axios.post(`${MODEL_URI}/predict`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
       });
 
-      console.log(res.data.class, "hello from res");
+      console.log(res.data.class, 'hello from res');
       setResult(res.data.class);
     } catch (err) {
-      setError("Failed to analyze image. Please try again.");
-      console.error("API Error:", err);
+      setError('Failed to analyze image. Please try again.');
+      console.error('API Error:', err);
     } finally {
       setLoading(false);
     }
-
   };
-  const sendAction = async (action) =>{
-    try{
+  const sendAction = async (action) => {
+    try {
       const token = await AsyncStorage.getItem('token');
       if (!token) return;
 
-      const res = await axios.post(`${BACKEND_URL}/api/esp-action/post-action`, { action }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(res.data, "res");
-      if(res.data.success){
-        console.log("Action sent successfully");
+      const res = await axios.post(
+        `${BACKEND_URL}/api/esp-action/post-action`,
+        { action },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res.data, 'res');
+      if (res.data.success) {
+        console.log('Action sent successfully');
       }
-    }catch(e){
-      console.error('Processing query error:', e.response ? e.response.data : e.message);
+    } catch (e) {
+      console.error(
+        'Processing query error:',
+        e.response ? e.response.data : e.message
+      );
       setError('Failed to process action. Please try again.');
     }
-  }
+  };
   const getRecommendations = async () => {
     setLoadingRecommendations(true);
     setError(null);
@@ -121,18 +138,29 @@ export default function Detect() {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) return;
-      console.log(BACKEND_URL, "url");
-      console.log(token, "token");
-      console.log(result, "result");
+      // console.log(BACKEND_URL, "url");
+      // console.log(token, "token");
+      console.log(result, 'result');
 
-      const res = await axios.post(`${BACKEND_URL}/api/recommendation/chat`, { prompt: result, usecase: "disease" }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(res.data.answer, "res");
-      setRecommendations(res.data.answer);
-      await sendAction(res.data.answer)
+      const res = await axios.post(
+        `${BACKEND_URL}/api/recommendation/chat`,
+        { prompt: result, usecase: 'disease' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res);
+      console.log('res from recommendation');
+      const jsonText = res.data.answer;
+      const extractedData = JSON.parse(
+        jsonText.replace(/```json|```/g, '').trim()
+      );
+      setRecommendations(extractedData.recommendation);
+      setAction(extractedData.action);
+      console.log(extractedData.action, 'extractedData');
+      // await sendAction(extractedData.action)
     } catch (err) {
       setError('Failed to give recommendations. Please try again.');
       console.error('API Error:', err);
@@ -153,14 +181,20 @@ export default function Detect() {
             contentFit="contain"
             style={{ width: 300, aspectRatio: 1 }}
           />
-          <Button style={{ margin: 50, marginTop: 10 }} icon="reload" mode="contained-tonal" onPress={() => setUri(null)}>Take another picture</Button>
+          <Button
+            style={{ margin: 50, marginTop: 10 }}
+            icon="reload"
+            mode="contained-tonal"
+            onPress={() => setUri(null)}
+          >
+            Take another picture
+          </Button>
           <Button
             icon="magnify"
             mode="contained-tonal"
             onPress={detectDisease}
             // loading={loading}
             disabled={loading}
-
           >
             Detect Disease
           </Button>
@@ -171,12 +205,11 @@ export default function Detect() {
             </View>
           )}
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           {!loading && renderResult()}
           {!loadingRecommendations && renderRecommendations()}
+          {action && renderAction()}
         </View>
       </ScrollView>
     );
@@ -225,14 +258,52 @@ export default function Detect() {
 
     return (
       <View style={styles.resultCard}>
-        <Text variant="titleLarge" style={styles.resultTitle}>
-          Recommendations
-        </Text>
-        <Text variant="bodyMedium" style={styles.recommendations}>
-          {recommendations}
-        </Text>
-      </View>
+      <Text variant="titleLarge" style={styles.resultTitle}>
+        Recommendations
+      </Text>
 
+      {Array.isArray(recommendations) ? (
+        recommendations?.map((rec, index) => (
+        <Text key={index} style={[styles.resultText, { marginBottom: 8 }]}>
+          • {rec}
+        </Text>
+        ))
+      ) : (
+        <Text style={styles.resultText}>{recommendations}</Text>
+      )}
+      </View>
+    );
+  };
+  const renderAction = () => {
+    if (!action) return (
+      <View style={styles.resultCard}>
+      <Text style={[styles.resultText, { marginBottom: 8 }]}>
+        No action required
+      </Text>
+      </View>
+    );
+
+    return (
+      <View style={styles.resultCard}>
+      <Text variant="titleLarge" style={styles.resultTitle}>
+        Action:{action}
+      </Text>
+
+      <TouchableOpacity onPress={(e) =>{
+        e.persist();
+        sendAction(action)
+      }}
+      style={{
+        backgroundColor: '#007BFF',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 10,
+      }}
+      >
+        <Text>Send Action</Text>
+      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -248,13 +319,13 @@ export default function Detect() {
       >
         <View style={styles.shutterContainer}>
           <Pressable onPress={toggleMode}>
-            {mode === "picture" ? (
+            {mode === 'picture' ? (
               <AntDesign name="picture" size={32} color="white" />
             ) : (
               <Feather name="video" size={32} color="white" />
             )}
           </Pressable>
-          <Pressable onPress={mode === "picture" ? takePicture : recordVideo}>
+          <Pressable onPress={mode === 'picture' ? takePicture : recordVideo}>
             {({ pressed }) => (
               <View
                 style={[
@@ -268,7 +339,7 @@ export default function Detect() {
                   style={[
                     styles.shutterBtnInner,
                     {
-                      backgroundColor: mode === "picture" ? "white" : "red",
+                      backgroundColor: mode === 'picture' ? 'white' : 'red',
                     },
                   ]}
                 />
@@ -293,33 +364,33 @@ export default function Detect() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   camera: {
     flex: 1,
-    width: "100%",
+    width: '100%',
   },
   shutterContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 44,
     left: 0,
-    width: "100%",
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
+    width: '100%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 30,
   },
   shutterBtn: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderWidth: 5,
-    borderColor: "white",
+    borderColor: 'white',
     width: 85,
     height: 85,
     borderRadius: 45,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   shutterBtnInner: {
     width: 70,
@@ -361,7 +432,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 16,
   },

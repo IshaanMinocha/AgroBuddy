@@ -14,11 +14,22 @@ export const cropRecommendationPrompt = `
     suggest detailed measures to improve the yield.
     `;
 
-export const diseaseDetectionPrompt = `
-    Given the crop disease, provide exactly 3 Do's and 3 Don'ts to improve crop condition and yield. Each point should be concise, practical, and based on agricultural best practices. Format the response with relevant icons for each point with \n after each point as seperator.
-    if there is no disease("healthy" at last of disease name), reply with "Crop is already healthy".
+    export const diseaseDetectionPrompt = `
+    Given the crop disease, provide exactly 3 Do's and 3 Don'ts to improve crop condition and yield. Each point should be concise, practical, and based on agricultural best practices.
+    
+    Return the result strictly as a JSON object with two fields:
+    1. "recommendation": A list of 3 Do's (each with a relevant icon and text), separated by strictly array only with no icons or anything just simple text\\n.
+    2. "action": exactly one phrase farm-performable action (like "irrigate the farmland", "apply nitrogen-rich fertilizer")
+
+    If the disease name includes the word "healthy" at the end, return:
+    {
+      "recommendation": "Crop is already healthy",
+      "action": null
+    }
+    
     Disease name:
     `;
+    
 
 export const yieldPredictionPrompt = `
     I will provide you with a crop name and its environmental & soil conditions. Your task is to analyze these values by comparing them with the ideal conditions for that crop. Then, suggest detailed measures to improve the yield.
