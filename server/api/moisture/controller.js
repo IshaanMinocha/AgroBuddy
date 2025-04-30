@@ -18,7 +18,7 @@ const getMoisture = asyncHandler(async (req, res) => {
             message: "Sent successfully"
         });
     } catch (error) {
-        console.error("Failed to fetch from ESP32:", err.message);
+        console.error("Failed to fetch from ESP32:", error.message);
         res.status(500).json({ error: "Failed to get data from ESP32" });
     }
 });

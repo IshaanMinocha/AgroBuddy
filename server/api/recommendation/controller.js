@@ -48,7 +48,7 @@ export const chatCompletion = async (req, res) => {
         );
 
         const answer = openaiResponse.data.choices[0].message.content;
-
+        console.log(answer);
         res.status(200).json({ success: true, answer });
     } catch (error) {
         console.error('Processing query error:', error.response ? error.response.data : error.message);
