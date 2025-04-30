@@ -12,7 +12,8 @@ import { MODEL_URI, BACKEND_URL } from "@env"
 import axios from "axios"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
-import {ESP32_IP} from "@env"
+
+
 const YieldMonitoringPage = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -75,11 +76,11 @@ const YieldMonitoringPage = () => {
   // }, [recommendationData, yieldData]);
 
   const [recommendationData, setRecommendationData] = useState({
-    "nitrogen": 90,
-    "phosphorus": 42,
-    "potassium": 43,
+    "nitrogen": 27,
+    "phosphorus": 13,
+    "potassium": 13,
     "ph": 6.5,
-    "rainfall": 202.9
+    "rainfall": 102.9
 });
 
   const [yieldData, setYieldData] = useState({});
@@ -169,23 +170,33 @@ const YieldMonitoringPage = () => {
       };
       const response = await axios.post(`${MODEL_URI}/recommend-crop`, payload);
       console.log(response.data.recommended_crop, 'response crop');
-      try{
-        const res = await axios.get(`${BACKEND_URL}/api/moisture/esp`);
-        setYieldData(prev => ({
-          ...prev,
-          crop: response.data.recommended_crop,
-          soil_moisture: res.data.moisture,
-         }))
-      }catch(e){
-        console.error('Error getting moisture data:', e);
-      }
-      
+     
       setRecommendation(response.data.recommended_crop);
+      setYieldData(prev => ({
+        ...prev,
+        crop: response.data.recommended_crop,
+       }))
     
     } catch (e) {
       console.error('Error getting crop recommendation:', e);
     }
   };
+const getMoisture = async () => {
+  try{
+    const res = await axios.get(`${BACKEND_URL}/api/moisture/esp`);
+    console.log(res.data.moisture, "fadfad")
+    setYieldData(prev => ({
+      ...prev,
+      soil_moisture: res.data.moisture?.toString() || '',
+     }))
+  }catch(e){
+    console.error('Error getting moisture data:', e);
+  }
+  
+}
+  useEffect(()=>{
+    getMoisture();
+  },[]);
 
   const getYieldPrediction = async () => {
     try {
