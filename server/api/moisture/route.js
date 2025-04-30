@@ -1,8 +1,8 @@
 import express from 'express';
-import { protect } from '../../middlewares/AuthMiddleware.js';
+import { getMoisture } from './controller.js';
 
 const router = express.Router();
 
-router.route('/esp').post(protect, getMoisture);
+router.route('/esp').get(getMoisture);
 
 export default router;
